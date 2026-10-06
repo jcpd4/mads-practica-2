@@ -1,4 +1,4 @@
-# Aplicación inicial ToDoList
+# Aplicación inicial ToDoList - Juan Carlos Ponce de León RUiz
 
 Aplicación ToDoList de la asignatura [MADS](https://cvnet.cpd.ua.es/Guia-Docente/GuiaDocente/Index?wcodest=C203&wcodasi=34037&wlengua=es&scaca=2019-20) usando Spring Boot y plantillas Thymeleaf.
 
@@ -21,9 +21,13 @@ También puedes generar un `jar` y ejecutarlo:
 
 ```
 $ ./mvnw package
-$ java -jar target/mads-todolist-inicial-0.0.1-SNAPSHOT.jar 
+$ java -jar target/mads-todolist-JuanCarlosPonceDeLeonRuiz-0.0.1-SNAPSHOT.jar 
 ```
 
 Una vez lanzada la aplicación puedes abrir un navegador y probar la página de inicio:
 
 - [http://localhost:8080/login](http://localhost:8080/login)
+
+## Tablero Trello
+
+- [ToDoList MADS](https://trello.com/b/ruBi78a3)
