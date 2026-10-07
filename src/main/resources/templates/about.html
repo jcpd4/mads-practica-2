@@ -4,19 +4,25 @@
 <head th:replace="fragments :: head (titulo='Acerca de')"></head>
 
 <body>
-<div class="container-fluid">
+    <th:block th:if="${usuario != null}">
+            <div th:replace="fragments :: navbar"></div>
+        </th:block>
+        <th:block th:unless="${usuario != null}">
+            <div th:replace="fragments :: navbarNoLogeado"></div>
+    </th:block>
     <div class="container-fluid">
-        <h1>ToDoList</h1>
-        <ul>
-            <li>Desarrollada por Juan Carlos Ponce de León Ruiz </li>
-            <li>Versión 1.1.0 (en desarrollo)</li>
-            <li>Fecha de release: pendiente de release</li>
-        </ul>
+        <div class="container-fluid">
+            <h1>ToDoList</h1>
+            <ul>
+                <li>Desarrollada por Juan Carlos Ponce de León Ruiz </li>
+                <li>Versión 1.1.0 (en desarrollo)</li>
+                <li>Fecha de release: pendiente de release</li>
+            </ul>
+        </div>
+
     </div>
 
-</div>
-
-<div th:replace="fragments::javascript"/>
+    <div th:replace="fragments::javascript"/>
 
 </body>
 </html>
