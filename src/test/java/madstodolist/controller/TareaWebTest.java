@@ -86,6 +86,24 @@ public class TareaWebTest {
                         containsString("Renovar DNI")
                 ))));
     }
+// Nuevo test :
+    @Test
+    public void listaTareasMuestraBarraDeMenu() throws Exception {
+        // GIVEN
+        // Un usuario con nombre registrado en la BD y logeado
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("ana@ua");
+        usuario.setNombre("Ana");
+        usuario.setPassword("123");
+        usuario = usuarioService.registrar(usuario);
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        // el listado de tareas muestra la barra de menú con su nombre
+        this.mockMvc.perform(get("/usuarios/" + usuario.getId() + "/tareas"))
+                .andExpect(content().string(containsString("Cerrar sesión Ana")));
+    }
 
     @Test
     public void getNuevaTareaDevuelveForm() throws Exception {
