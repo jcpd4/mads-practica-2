@@ -218,4 +218,25 @@ public class TareaWebTest {
         this.mockMvc.perform(get(urlListado))
                 .andExpect(content().string(containsString("Limpiar cristales coche")));
     }
+    @Test
+    public void formEditarTareaContieneNavbar() throws Exception {
+        // GIVEN: un usuario con nombre y una tarea suya
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("ana@ua");
+        usuario.setPassword("123");
+        usuario.setNombre("Ana");
+        usuario = usuarioService.registrar(usuario);
+        
+        TareaData tarea = tareaService.nuevaTareaUsuario(usuario.getId(), "Lavar coche");
+
+        // Mockeamos el usuario logeado
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN: se hace GET a la vista de editar la tarea
+        String url = "/tareas/" + tarea.getId() + "/editar";
+
+        // THEN: el HTML contiene "Cerrar sesión Ana"
+        this.mockMvc.perform(get(url))
+                .andExpect(content().string(containsString("Cerrar sesión Ana")));
+    }
 }
