@@ -34,6 +34,7 @@ public class UsuariosRegistradosWebTest {
     @Test
     public void listadoUsuariosMuestraEmailsEIds() throws Exception {
         // GIVEN: dos usuarios registrados en la base de datos
+        logearAdmin();
         UsuarioData usuario1 = new UsuarioData();
         usuario1.setEmail("ana@ua");
         usuario1.setPassword("123");
@@ -57,6 +58,7 @@ public class UsuariosRegistradosWebTest {
     @Test
     public void listadoUsuariosContieneEnlaceADescripcion() throws Exception {
         // GIVEN: un usuario registrado
+        logearAdmin();
         UsuarioData usuario = new UsuarioData();
         usuario.setEmail("enlace@ua");
         usuario.setPassword("123");
@@ -70,6 +72,7 @@ public class UsuariosRegistradosWebTest {
     @Test
     public void descripcionUsuarioMuestraDatosYNoContrasena() throws Exception {
         // GIVEN: un usuario registrado con una contraseña reconocible
+        logearAdmin();
         UsuarioData usuario = new UsuarioData();
         usuario.setEmail("carlos@ua");
         usuario.setNombre("Carlos");
@@ -88,9 +91,20 @@ public class UsuariosRegistradosWebTest {
     @Test
     public void descripcionUsuarioNoExistenteDevuelve404() throws Exception {
         // GIVEN: la base de datos vacía (no creamos nada)
-
+        logearAdmin();
         // WHEN, THEN: GET a un ID que no existe devuelve error 404 (Not Found)
         this.mockMvc.perform(get("/registrados/999"))
                 .andExpect(status().isNotFound());
+    }
+    private UsuarioData logearAdmin() {
+        UsuarioData admin = new UsuarioData();
+        admin.setEmail("admin_test@ua");
+        admin.setPassword("123");
+        admin.setNombre("Admin");
+        admin.setAdmin(true);
+        admin = usuarioService.registrar(admin);
+        
+        when(managerUserSession.usuarioLogeado()).thenReturn(admin.getId());
+        return admin;
     }
 }
