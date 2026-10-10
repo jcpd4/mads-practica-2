@@ -212,4 +212,34 @@ public class UsuarioServiceTest {
             usuarioService.registrar(admin2);
         });
     }
+    @Test
+    public void cambiarBloqueoAlternaEstado() {
+        // GIVEN: un usuario normal registrado en la base de datos
+        Long idUsuario = addUsuarioBD();
+        
+        // WHEN / THEN: al cambiar el bloqueo la primera vez, el usuario queda bloqueado
+        usuarioService.cambiarBloqueo(idUsuario);
+        assertThat(usuarioService.findById(idUsuario).isBloqueado()).isTrue();
+        
+        // WHEN / THEN: al volver a llamar al método, se invierte el valor y queda habilitado
+        usuarioService.cambiarBloqueo(idUsuario);
+        assertThat(usuarioService.findById(idUsuario).isBloqueado()).isFalse();
+    }
+
+    @Test
+    public void cambiarBloqueoAdminLanzaExcepcion() {
+        // GIVEN: un usuario administrador registrado en el sistema
+        UsuarioData admin = new UsuarioData();
+        admin.setEmail("admin_bloqueo@ua");
+        admin.setPassword("123");
+        admin.setAdmin(true);
+        admin = usuarioService.registrar(admin);
+        
+        Long idAdmin = admin.getId();
+        
+        // WHEN / THEN: si intentamos cambiar su estado de bloqueo, salta la excepción
+        Assertions.assertThrows(UsuarioServiceException.class, () -> {
+            usuarioService.cambiarBloqueo(idAdmin);
+        });
+    }
 }

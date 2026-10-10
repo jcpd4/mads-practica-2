@@ -90,4 +90,22 @@ public class UsuarioService {
     public boolean existeAdmin() {
         return usuarioRepository.existsByAdminTrue();
     }
+
+    @Transactional
+    public UsuarioData cambiarBloqueo(Long idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        
+        if (usuario == null) {
+            throw new UsuarioServiceException("El usuario no existe");
+        }
+        if (usuario.isAdmin()) {
+            throw new UsuarioServiceException("No se puede bloquear al administrador");
+        }
+        
+        // Invertimos el valor (si era false pasa a true, y viceversa)
+        usuario.setBloqueado(!usuario.isBloqueado());
+        
+        usuario = usuarioRepository.save(usuario);
+        return modelMapper.map(usuario, UsuarioData.class);
+    }
 }
