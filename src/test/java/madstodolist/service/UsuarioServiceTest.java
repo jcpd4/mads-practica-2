@@ -193,4 +193,23 @@ public class UsuarioServiceTest {
         // THEN: ahora sí existe un administrador en el sistema
         assertThat(usuarioService.existeAdmin()).isTrue();
     }
+    @Test
+    public void registrarSegundoAdminLanzaExcepcion() {
+        // GIVEN: registramos un primer administrador
+        UsuarioData admin1 = new UsuarioData();
+        admin1.setEmail("admin1@ua");
+        admin1.setPassword("123");
+        admin1.setAdmin(true);
+        usuarioService.registrar(admin1);
+
+        // WHEN / THEN: al intentar registrar un segundo administrador, salta la excepción
+        UsuarioData admin2 = new UsuarioData();
+        admin2.setEmail("admin2@ua");
+        admin2.setPassword("123");
+        admin2.setAdmin(true);
+
+        Assertions.assertThrows(UsuarioServiceException.class, () -> {
+            usuarioService.registrar(admin2);
+        });
+    }
 }
