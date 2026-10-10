@@ -48,6 +48,15 @@ public class Usuario implements Serializable {
     public Usuario(String email) {
         this.email = email;
     }
+    private boolean bloqueado = false;
+
+    public boolean isBloqueado() {
+        return bloqueado;
+    }
+
+    public void setBloqueado(boolean bloqueado) {
+        this.bloqueado = bloqueado;
+    }
 
     // Getters y setters atributos básicos
 
