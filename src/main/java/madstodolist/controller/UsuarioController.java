@@ -8,6 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import madstodolist.controller.exception.UsuarioNotFoundException;
+
 import java.util.List;
 
 @Controller
@@ -34,5 +37,26 @@ public class UsuarioController {
 
         // 3. Devolver la vista
         return "listaUsuarios";
+    }
+    @GetMapping("/registrados/{id}")
+    public String descripcionUsuario(@PathVariable(value="id") Long idUsuario, Model model) {
+        // 1 y 2. Buscar usuario y lanzar excepción si no existe
+        UsuarioData usuarioDescripcion = usuarioService.findById(idUsuario);
+        if (usuarioDescripcion == null) {
+            throw new UsuarioNotFoundException();
+        }
+        
+        // 3. Añadir el usuario a consultar al modelo
+        model.addAttribute("usuarioDescripcion", usuarioDescripcion);
+
+        // 4. Gestionar la barra de menú para el usuario logeado
+        Long idLogeado = managerUserSession.usuarioLogeado();
+        if (idLogeado != null) {
+            UsuarioData usuario = usuarioService.findById(idLogeado);
+            model.addAttribute("usuario", usuario);
+        }
+
+        // 5. Devolver la vista
+        return "descripcionUsuario";
     }
 }
