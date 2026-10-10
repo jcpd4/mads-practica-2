@@ -175,4 +175,22 @@ public class UsuarioServiceTest {
         assertThat(usuarios.get(0).getEmail()).isEqualTo("user@ua");
         assertThat(usuarios.get(1).getEmail()).isEqualTo("ana@ua");
     }
+    @Test
+    public void existeAdminCompruebaSiHayAdministrador() {
+        // GIVEN: un usuario normal registrado en la base de datos
+        addUsuarioBD(); // Este método crea a user@ua (admin = false por defecto)
+
+        // THEN: no existe ningún administrador
+        assertThat(usuarioService.existeAdmin()).isFalse();
+
+        // GIVEN: registramos un nuevo usuario indicando que es administrador
+        UsuarioData usuarioAdmin = new UsuarioData();
+        usuarioAdmin.setEmail("admin@ua");
+        usuarioAdmin.setPassword("123");
+        usuarioAdmin.setAdmin(true);
+        usuarioService.registrar(usuarioAdmin);
+
+        // THEN: ahora sí existe un administrador en el sistema
+        assertThat(usuarioService.existeAdmin()).isTrue();
+    }
 }

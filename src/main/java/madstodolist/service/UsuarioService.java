@@ -83,4 +83,8 @@ public class UsuarioService {
         }
         return usuarios;
     }
+    @Transactional(readOnly = true)
+    public boolean existeAdmin() {
+        return usuarioRepository.existsByAdminTrue();
+    }
 }
