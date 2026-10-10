@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Usuarios registrados')"></head>
+
+<body>
+    <!-- Barra de menú condicional (igual que en about.html) -->
+    <th:block th:if="${usuario != null}">
+        <div th:replace="fragments :: navbar"></div>
+    </th:block>
+    <th:block th:unless="${usuario != null}">
+        <div th:replace="fragments :: navbarNoLogeado"></div>
+    </th:block>
+
+    <div class="container-fluid mt-3">
+        <h2>Usuarios registrados</h2>
+        
+        <div class="row mt-3">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Usamos la variable 'u' para que no choque con 'usuario' -->
+                        <tr th:each="u : ${usuarios}">
+                            <td th:text="${u.id}"></td>
+                            <td th:text="${u.email}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments::javascript"/>
+</body>
+</html>
