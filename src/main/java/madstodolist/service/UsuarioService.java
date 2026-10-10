@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.Optional;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class UsuarioService {
 
     Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
-    public enum LoginStatus {LOGIN_OK, USER_NOT_FOUND, ERROR_PASSWORD}
+    public enum LoginStatus {LOGIN_OK, USER_NOT_FOUND, ERROR_PASSWORD, USER_BLOCKED}
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -34,6 +35,8 @@ public class UsuarioService {
             return LoginStatus.USER_NOT_FOUND;
         } else if (!usuario.get().getPassword().equals(password)) {
             return LoginStatus.ERROR_PASSWORD;
+        } else if (usuario.get().isBloqueado()) {
+            return LoginStatus.USER_BLOCKED;
         } else {
             return LoginStatus.LOGIN_OK;
         }
@@ -89,5 +92,23 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public boolean existeAdmin() {
         return usuarioRepository.existsByAdminTrue();
+    }
+
+    @Transactional
+    public UsuarioData cambiarBloqueo(Long idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        
+        if (usuario == null) {
+            throw new UsuarioServiceException("El usuario no existe");
+        }
+        if (usuario.isAdmin()) {
+            throw new UsuarioServiceException("No se puede bloquear al administrador");
+        }
+        
+        // Invertimos el valor (si era false pasa a true, y viceversa)
+        usuario.setBloqueado(!usuario.isBloqueado());
+        
+        usuario = usuarioRepository.save(usuario);
+        return modelMapper.map(usuario, UsuarioData.class);
     }
 }
