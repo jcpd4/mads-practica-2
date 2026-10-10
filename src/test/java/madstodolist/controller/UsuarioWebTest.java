@@ -9,9 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -92,5 +95,24 @@ public class UsuarioWebTest {
                         .param("eMail","ana.garcia@gmail.com")
                         .param("password","000"))
                 .andExpect(content().string(containsString("Contraseña incorrecta")));
+    }
+    @Test
+    public void siNoExisteAdminSeMuestraCheckboxEnRegistro() throws Exception {
+        // GIVEN: simulamos que el servicio dice que NO existe ningún administrador
+        when(usuarioService.existeAdmin()).thenReturn(false);
+
+        // WHEN, THEN: GET a /registro muestra el checkbox
+        this.mockMvc.perform(get("/registro"))
+                .andExpect(content().string(containsString("Registrarse como administrador")));
+    }
+
+    @Test
+    public void siExisteAdminNoSeMuestraCheckboxEnRegistro() throws Exception {
+        // GIVEN: simulamos que el servicio dice que SÍ existe un administrador
+        when(usuarioService.existeAdmin()).thenReturn(true);
+
+        // WHEN, THEN: GET a /registro NO muestra el checkbox
+        this.mockMvc.perform(get("/registro"))
+                .andExpect(content().string(not(containsString("Registrarse como administrador"))));
     }
 }
