@@ -9,6 +9,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 @SpringBootTest
 @Sql(scripts = "/clean-db.sql")
 public class UsuarioServiceTest {
@@ -152,5 +154,25 @@ public class UsuarioServiceTest {
         assertThat(usuario.getId()).isEqualTo(usuarioId);
         assertThat(usuario.getEmail()).isEqualTo("user@ua");
         assertThat(usuario.getNombre()).isEqualTo("Usuario Ejemplo");
+    }
+    @Test
+    public void allUsuariosDevuelveListaConTodosLosUsuarios() {
+        // GIVEN: dos usuarios en la base de datos
+        // El primero lo creamos con el método de la clase (crea user@ua)
+        addUsuarioBD();
+        
+        // El segundo lo creamos a mano
+        UsuarioData usuario2 = new UsuarioData();
+        usuario2.setEmail("ana@ua");
+        usuario2.setPassword("123");
+        usuarioService.registrar(usuario2);
+
+        // WHEN: obtenemos la lista de todos los usuarios
+        List<UsuarioData> usuarios = usuarioService.allUsuarios();
+
+        // THEN: comprobamos el tamaño y los correos
+        assertThat(usuarios).hasSize(2);
+        assertThat(usuarios.get(0).getEmail()).isEqualTo("user@ua");
+        assertThat(usuarios.get(1).getEmail()).isEqualTo("ana@ua");
     }
 }
