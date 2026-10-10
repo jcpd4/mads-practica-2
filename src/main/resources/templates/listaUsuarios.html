@@ -22,6 +22,7 @@
                         <tr>
                             <th>Id</th>
                             <th>Email</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,6 +30,9 @@
                         <tr th:each="u : ${usuarios}">
                             <td th:text="${u.id}"></td>
                             <td th:text="${u.email}"></td>
+                            <td>
+                                <a class="btn btn-info btn-sm" th:href="@{/registrados/{id}(id=${u.id})}">Ver</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
