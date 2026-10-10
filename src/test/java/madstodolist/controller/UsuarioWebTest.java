@@ -2,6 +2,8 @@ package madstodolist.controller;
 
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.UsuarioService;
+import madstodolist.service.UsuarioService.LoginStatus;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -114,5 +116,23 @@ public class UsuarioWebTest {
         // WHEN, THEN: GET a /registro NO muestra el checkbox
         this.mockMvc.perform(get("/registro"))
                 .andExpect(content().string(not(containsString("Registrarse como administrador"))));
+    }
+    @Test
+    public void servicioLoginAdminRedirigeARegistrados() throws Exception {
+        // GIVEN: simulamos que el login es correcto y el usuario es administrador
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(1L);
+        usuario.setEmail("admin@ua");
+        usuario.setAdmin(true);
+
+        when(usuarioService.login("admin@ua", "123")).thenReturn(LoginStatus.LOGIN_OK);
+        when(usuarioService.findByEmail("admin@ua")).thenReturn(usuario);
+
+        // WHEN, THEN: hacer un POST a /login nos redirige a /registrados
+        this.mockMvc.perform(post("/login")
+                .param("eMail", "admin@ua")
+                .param("password", "123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
     }
 }
