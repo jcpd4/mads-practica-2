@@ -14,6 +14,16 @@ public class Usuario implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private boolean admin = false;
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

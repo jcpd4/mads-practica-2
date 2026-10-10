@@ -171,4 +171,25 @@ public class UsuarioTest {
 
         assertThat(usuarioBD.getNombre()).isEqualTo("Usuario Ejemplo");
     }
+    @Test
+    @Transactional
+    public void comprobarSiExisteAdmin() {
+        // GIVEN: un usuario normal guardado en la base de datos
+        Usuario usuarioNormal = new Usuario("normal@ua");
+        usuarioNormal.setPassword("123");
+        // usuarioNormal.setAdmin(false); // Por defecto es false
+        usuarioRepository.save(usuarioNormal);
+
+        // THEN: no existe ningún administrador
+        assertThat(usuarioRepository.existsByAdminTrue()).isFalse();
+
+        // GIVEN: guardamos un nuevo usuario que sí es administrador
+        Usuario usuarioAdmin = new Usuario("admin@ua");
+        usuarioAdmin.setPassword("123");
+        usuarioAdmin.setAdmin(true);
+        usuarioRepository.save(usuarioAdmin);
+
+        // THEN: ahora sí existe un administrador
+        assertThat(usuarioRepository.existsByAdminTrue()).isTrue();
+    }
 }

@@ -45,6 +45,9 @@ public class UsuarioService {
     @Transactional
     public UsuarioData registrar(UsuarioData usuario) {
         Optional<Usuario> usuarioBD = usuarioRepository.findByEmail(usuario.getEmail());
+        if (usuario.isAdmin() && existeAdmin()) {
+            throw new UsuarioServiceException("Ya existe un usuario administrador");
+        }
         if (usuarioBD.isPresent())
             throw new UsuarioServiceException("El usuario " + usuario.getEmail() + " ya está registrado");
         else if (usuario.getEmail() == null)
@@ -82,5 +85,9 @@ public class UsuarioService {
             usuarios.add(modelMapper.map(usuario, UsuarioData.class));
         }
         return usuarios;
+    }
+    @Transactional(readOnly = true)
+    public boolean existeAdmin() {
+        return usuarioRepository.existsByAdminTrue();
     }
 }
