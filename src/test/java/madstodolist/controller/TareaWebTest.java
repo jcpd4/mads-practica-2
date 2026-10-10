@@ -239,4 +239,15 @@ public class TareaWebTest {
         this.mockMvc.perform(get(url))
                 .andExpect(content().string(containsString("Cerrar sesión Ana")));
     }
+    @Test
+    public void barraDeMenuNoMuestraEnlaceUsuariosParaUsuarioNormal() throws Exception {
+        // GIVEN: un usuario normal (no admin) logeado
+        Map<String, Long> ids = addUsuarioTareasBD();
+        Long usuarioId = ids.get("usuarioId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
+
+        // WHEN, THEN: GET a su lista de tareas NO contiene el enlace a /registrados
+        this.mockMvc.perform(get("/usuarios/" + usuarioId + "/tareas"))
+                .andExpect(content().string(not(containsString("href=\"/registrados\""))));
+    }
 }

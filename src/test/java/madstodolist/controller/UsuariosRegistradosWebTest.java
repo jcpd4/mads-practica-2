@@ -135,6 +135,15 @@ public class UsuariosRegistradosWebTest {
         this.mockMvc.perform(get("/registrados/" + usuarioNormal.getId()))
                 .andExpect(status().isUnauthorized());
     }
+    @Test
+    public void barraDeMenuMuestraEnlaceUsuariosParaAdmin() throws Exception {
+        // GIVEN: un admin logeado
+        logearAdmin();
+
+        // WHEN, THEN: la barra de menú contiene el enlace a /registrados
+        this.mockMvc.perform(get("/registrados"))
+                .andExpect(content().string(containsString("href=\"/registrados\"")));
+    }
     private UsuarioData logearAdmin() {
         UsuarioData admin = new UsuarioData();
         admin.setEmail("admin_test@ua");
