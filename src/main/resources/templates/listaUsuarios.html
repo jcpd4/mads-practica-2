@@ -22,16 +22,30 @@
                         <tr>
                             <th>Id</th>
                             <th>Email</th>
+                            <th>Nombre</th>
+                            <th>Estado</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Usamos la variable 'u' para que no choque con 'usuario' -->
                         <tr th:each="u : ${usuarios}">
-                            <td th:text="${u.id}"></td>
-                            <td th:text="${u.email}"></td>
+                            <td th:text="${u.id}">1</td>
+                            <td th:text="${u.email}">user@ua</td>
+                            <td th:text="${u.nombre}">User</td>
+                            <!-- Celda de estado -->
+                            <td th:text="${u.bloqueado} ? 'Bloqueado' : 'Activo'">Activo</td>
                             <td>
-                                <a class="btn btn-info btn-sm" th:href="@{/registrados/{id}(id=${u.id})}">Ver</a>
+                                <!-- Botón Ver (el que ya tenías) -->
+                                <a class="btn btn-primary btn-sm" th:href="@{/registrados/{id}(id=${u.id})}">Ver</a>
+                                
+                                <!-- Botón Bloquear/Habilitar (no se muestra si es admin) -->
+                                <form method="post" th:action="@{/registrados/{id}/bloqueo(id=${u.id})}" class="d-inline" th:unless="${u.admin}">
+                                    <button type="submit" 
+                                            class="btn btn-sm" 
+                                            th:classappend="${u.bloqueado} ? 'btn-success' : 'btn-danger'" 
+                                            th:text="${u.bloqueado} ? 'Habilitar' : 'Bloquear'">
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     </tbody>

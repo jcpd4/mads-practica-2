@@ -146,5 +146,23 @@ public class TareaServiceTest {
 
         assertThat(tareaService.usuarioContieneTarea(usuarioId,tareaId)).isTrue();
     }
+    @Test
+    public void loginUsuarioBloqueadoDevuelveUserBlocked() {
+        // GIVEN: registramos un usuario y lo bloqueamos
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("bloqueado@ua");
+        usuario.setPassword("123");
+        usuario = usuarioService.registrar(usuario);
+        
+        usuarioService.cambiarBloqueo(usuario.getId());
+
+        // WHEN / THEN: login con credenciales correctas devuelve USER_BLOCKED
+        assertThat(usuarioService.login("bloqueado@ua", "123"))
+                .isEqualTo(UsuarioService.LoginStatus.USER_BLOCKED);
+        
+        // WHEN / THEN: login con contraseña incorrecta salta antes y devuelve ERROR_PASSWORD
+        assertThat(usuarioService.login("bloqueado@ua", "bad_password"))
+                .isEqualTo(UsuarioService.LoginStatus.ERROR_PASSWORD);
+    }
 
 }

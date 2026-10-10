@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import madstodolist.controller.exception.UsuarioNotFoundException;
 import madstodolist.controller.exception.UsuarioNoAutorizadoException;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -55,6 +56,17 @@ public class UsuarioController {
 
         // 4. Devolver la vista
         return "descripcionUsuario";
+    }
+    @PostMapping("/registrados/{id}/bloqueo")
+    public String cambiarBloqueo(@PathVariable(value="id") Long idUsuario) {
+        // Solo permitimos la acción si es un administrador
+        comprobarAdmin();
+        
+        // Llamamos al servicio para cambiar el estado (bloquear/habilitar)
+        usuarioService.cambiarBloqueo(idUsuario);
+        
+        // Patrón Post/Redirect/Get: volvemos al listado
+        return "redirect:/registrados";
     }
     private UsuarioData comprobarAdmin() {
         Long idUsuario = managerUserSession.usuarioLogeado();
