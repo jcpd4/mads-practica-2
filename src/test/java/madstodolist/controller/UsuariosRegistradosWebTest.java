@@ -96,6 +96,45 @@ public class UsuariosRegistradosWebTest {
         this.mockMvc.perform(get("/registrados/999"))
                 .andExpect(status().isNotFound());
     }
+    @Test
+    public void listadoUsuariosSinLoginDevuelve401() throws Exception {
+        // GIVEN: nadie logeado (hacemos explícito que el mock devuelve null)
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN, THEN: GET a /registrados devuelve 401 Unauthorized
+        this.mockMvc.perform(get("/registrados"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void listadoUsuariosConUsuarioNormalDevuelve401() throws Exception {
+        // GIVEN: un usuario normal (no admin) logeado
+        UsuarioData usuarioNormal = new UsuarioData();
+        usuarioNormal.setEmail("normal1@ua");
+        usuarioNormal.setPassword("123");
+        usuarioNormal = usuarioService.registrar(usuarioNormal);
+        
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioNormal.getId());
+
+        // WHEN, THEN: GET a /registrados devuelve 401 Unauthorized
+        this.mockMvc.perform(get("/registrados"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void descripcionUsuarioConUsuarioNormalDevuelve401() throws Exception {
+        // GIVEN: un usuario normal (no admin) logeado
+        UsuarioData usuarioNormal = new UsuarioData();
+        usuarioNormal.setEmail("normal2@ua");
+        usuarioNormal.setPassword("123");
+        usuarioNormal = usuarioService.registrar(usuarioNormal);
+        
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioNormal.getId());
+
+        // WHEN, THEN: GET a /registrados/{id} devuelve 401 Unauthorized
+        this.mockMvc.perform(get("/registrados/" + usuarioNormal.getId()))
+                .andExpect(status().isUnauthorized());
+    }
     private UsuarioData logearAdmin() {
         UsuarioData admin = new UsuarioData();
         admin.setEmail("admin_test@ua");

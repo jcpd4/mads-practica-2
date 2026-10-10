@@ -40,7 +40,7 @@ public class AcercaDeWebTest {
     public void getAboutSinLoginMuestraLoginYRegistro() throws Exception {
         // GIVEN
         // Ningún usuario logeado (el mock devuelve null por defecto)
-
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
         // WHEN, THEN
         // la página muestra los enlaces a login y registro
         this.mockMvc.perform(get("/about"))

@@ -61,7 +61,14 @@ public class UsuarioController {
         if (idUsuario == null) {
             throw new UsuarioNoLogeadoException();
         }
+        
         UsuarioData usuario = usuarioService.findById(idUsuario);
+        
+        // NUEVO: Comprobamos si el usuario no existe en la BD
+        if (usuario == null) {
+            throw new UsuarioNoLogeadoException();
+        }
+        
         if (!usuario.isAdmin()) {
             throw new UsuarioNoAutorizadoException();
         }
