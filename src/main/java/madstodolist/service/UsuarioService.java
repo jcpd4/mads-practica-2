@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class UsuarioService {
 
@@ -71,5 +74,13 @@ public class UsuarioService {
         else {
             return modelMapper.map(usuario, UsuarioData.class);
         }
+    }
+    @Transactional(readOnly = true)
+    public List<UsuarioData> allUsuarios() {
+        List<UsuarioData> usuarios = new ArrayList<>();
+        for (Usuario usuario : usuarioRepository.findAll()) {
+            usuarios.add(modelMapper.map(usuario, UsuarioData.class));
+        }
+        return usuarios;
     }
 }
