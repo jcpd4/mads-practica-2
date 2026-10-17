@@ -87,4 +87,18 @@ public class EquipoWebTest {
         this.mockMvc.perform(get("/equipos"))
                 .andExpect(status().isUnauthorized());
     }
+    @Test
+    public void barraMenuContieneEnlaceAEquipos() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        UsuarioData usuario = logearUsuario();
+
+        // WHEN, THEN
+        // La página de tareas del usuario (que usa la barra de menú común)
+        // contiene el enlace a la página de equipos
+        this.mockMvc.perform(get("/usuarios/" + usuario.getId() + "/tareas"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/equipos\"")));
+    }
+
 }
