@@ -8,6 +8,10 @@ import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// test 7
+import java.util.List;
+
+
 @SpringBootTest
 @Sql(scripts = "/clean-db.sql")
 public class EquipoServiceTest {
@@ -23,5 +27,22 @@ public class EquipoServiceTest {
         EquipoData equipoBd = equipoService.recuperarEquipo(equipo.getId());
         assertThat(equipoBd).isNotNull();
         assertThat(equipoBd.getNombre()).isEqualTo("Proyecto 1");
+    }
+        @Test
+    public void listadoEquiposOrdenAlfabetico() {
+        // GIVEN
+        // Dos equipos en la base de datos
+        equipoService.crearEquipo("Proyecto BBB");
+        equipoService.crearEquipo("Proyecto AAA");
+
+        // WHEN
+        // Recuperamos los equipos
+        List<EquipoData> equipos = equipoService.findAllOrdenadoPorNombre();
+
+        // THEN
+        // Los equipos están ordenados por nombre
+        assertThat(equipos).hasSize(2);
+        assertThat(equipos.get(0).getNombre()).isEqualTo("Proyecto AAA");
+        assertThat(equipos.get(1).getNombre()).isEqualTo("Proyecto BBB");
     }
 }

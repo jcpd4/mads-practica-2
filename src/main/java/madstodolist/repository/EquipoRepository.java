@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface EquipoRepository extends CrudRepository<Equipo, Long> {
     List<Equipo> findAll();
+    List<Equipo> findAllByOrderByNombreAsc();
+
 }
