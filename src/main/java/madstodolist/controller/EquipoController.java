@@ -12,6 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+import madstodolist.controller.exception.EquipoNotFoundException;
+import madstodolist.service.EquipoServiceException;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @Controller
 public class EquipoController {
@@ -35,6 +39,24 @@ public class EquipoController {
 
         return "listaEquipos";
     }
+
+    @GetMapping("/equipos/{id}")
+    public String descripcionEquipo(@PathVariable(value = "id") Long idEquipo, Model model) {
+        UsuarioData usuario = comprobarUsuarioLogeado();
+        model.addAttribute("usuario", usuario);
+
+        try {
+            EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+            List<UsuarioData> usuarios = equipoService.usuariosEquipo(idEquipo);
+            model.addAttribute("equipo", equipo);
+            model.addAttribute("usuarios", usuarios);
+        } catch (EquipoServiceException e) {
+            throw new EquipoNotFoundException();
+        }
+
+        return "descripcionEquipo";
+    }
+
 
     // Devuelve el usuario logeado o lanza una excepción (401) si no hay ninguno
     private UsuarioData comprobarUsuarioLogeado() {
