@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import madstodolist.dto.EquipoData;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -100,5 +101,49 @@ public class EquipoWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("href=\"/equipos\"")));
     }
+    @Test
+    public void descripcionEquipoMuestraSusUsuarios() throws Exception {
+        // GIVEN
+        // Un usuario logeado que pertenece a un equipo
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN, THEN
+        // La página del equipo muestra su nombre y el email del miembro
+        this.mockMvc.perform(get("/equipos/" + equipo.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("Proyecto AAA"),
+                        containsString("ana@ua")
+                )));
+    }
+
+    @Test
+    public void descripcionEquipoNoExistenteDevuelve404() throws Exception {
+        // GIVEN
+        // Un usuario logeado y ningún equipo en la BD
+        logearUsuario();
+
+        // WHEN, THEN
+        // Pedir un equipo que no existe devuelve 404 Not Found
+        this.mockMvc.perform(get("/equipos/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void listadoEquiposContieneEnlaceADescripcion() throws Exception {
+        // GIVEN
+        // Un usuario logeado y un equipo
+        logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+
+        // WHEN, THEN
+        // El listado contiene el enlace a la página del equipo
+        this.mockMvc.perform(get("/equipos"))
+                .andExpect(content().string(
+                        containsString("href=\"/equipos/" + equipo.getId() + "\"")));
+    }
+
 
 }
