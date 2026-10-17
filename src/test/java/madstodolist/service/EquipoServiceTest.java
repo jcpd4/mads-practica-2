@@ -180,6 +180,27 @@ public class EquipoServiceTest {
         // No se ha guardado ningún equipo en la base de datos
         assertThat(equipoService.findAllOrdenadoPorNombre()).isEmpty();
     }
+    // test 5 jk
+    @Test
+    public void añadirUsuarioQueYaPerteneceLanzaExcepcion() {
+        // GIVEN
+        // Un usuario que ya pertenece a un equipo
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        UsuarioData usuarioBD = usuarioService.registrar(usuario);
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuarioBD.getId());
+
+        // WHEN, THEN
+        // Volver a añadirlo lanza una excepción
+        assertThatThrownBy(() -> equipoService.añadirUsuarioAEquipo(equipo.getId(), usuarioBD.getId()))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // THEN
+        // El equipo sigue teniendo un único miembro
+        assertThat(equipoService.usuariosEquipo(equipo.getId())).hasSize(1);
+    }
 
 
 }
