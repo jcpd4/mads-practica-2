@@ -78,12 +78,40 @@ public class EquipoController {
             List<UsuarioData> usuarios = equipoService.usuariosEquipo(idEquipo);
             model.addAttribute("equipo", equipo);
             model.addAttribute("usuarios", usuarios);
+            model.addAttribute("perteneceAlEquipo",
+                    equipoService.usuarioPerteneceAEquipo(idEquipo, usuario.getId()));
+
         } catch (EquipoServiceException e) {
             throw new EquipoNotFoundException();
         }
 
         return "descripcionEquipo";
     }
+
+    @PostMapping("/equipos/{id}/unirse")
+    public String unirseAEquipo(@PathVariable(value = "id") Long idEquipo, RedirectAttributes flash) {
+        UsuarioData usuario = comprobarUsuarioLogeado();
+        try {
+            equipoService.añadirUsuarioAEquipo(idEquipo, usuario.getId());
+            flash.addFlashAttribute("mensaje", "Te has unido al equipo");
+        } catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/equipos/" + idEquipo;
+    }
+
+    @PostMapping("/equipos/{id}/salir")
+    public String salirDeEquipo(@PathVariable(value = "id") Long idEquipo, RedirectAttributes flash) {
+        UsuarioData usuario = comprobarUsuarioLogeado();
+        try {
+            equipoService.eliminarUsuarioDeEquipo(idEquipo, usuario.getId());
+            flash.addFlashAttribute("mensaje", "Has salido del equipo");
+        } catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/equipos/" + idEquipo;
+    }
+
 
 
     // Devuelve el usuario logeado o lanza una excepción (401) si no hay ninguno
