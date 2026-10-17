@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Equipos')"></head>
+
+<body>
+    <div th:replace="fragments :: navbar"></div>
+
+    <div class="container-fluid mt-3">
+        <h2>Equipos</h2>
+
+        <div class="row mt-3">
+            <div class="col">
+                <div class="alert alert-info" th:if="${#lists.isEmpty(equipos)}">
+                    No hay equipos todavía.
+                </div>
+
+                <table class="table table-striped" th:unless="${#lists.isEmpty(equipos)}">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="e : ${equipos}">
+                            <td>
+                                <a th:href="@{/equipos/{id}(id=${e.id})}" th:text="${e.nombre}"></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments::javascript"/>
+</body>
+</html>
