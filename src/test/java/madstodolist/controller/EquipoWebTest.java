@@ -15,8 +15,9 @@ import madstodolist.dto.EquipoData;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -143,6 +144,72 @@ public class EquipoWebTest {
         this.mockMvc.perform(get("/equipos"))
                 .andExpect(content().string(
                         containsString("href=\"/equipos/" + equipo.getId() + "\"")));
+    }
+        @Test
+    public void getNuevoEquipoDevuelveFormulario() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Se muestra el formulario para crear un equipo
+        this.mockMvc.perform(get("/equipos/nuevo"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("Nuevo equipo"),
+                        containsString("action=\"/equipos/nuevo\"")
+                )));
+    }
+
+    @Test
+    public void getNuevoEquipoSinLoginDevuelve401() throws Exception {
+        // GIVEN
+        // Ningún usuario logeado
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN, THEN
+        // No se puede acceder al formulario
+        this.mockMvc.perform(get("/equipos/nuevo"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void postNuevoEquipoCreaEquipoYRedirige() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Al enviar el formulario se redirige al listado con un mensaje
+        this.mockMvc.perform(post("/equipos/nuevo")
+                        .param("nombre", "Proyecto AAA"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attribute("mensaje", "Equipo creado correctamente"));
+
+        // THEN
+        // El equipo se ha guardado en la base de datos
+        assertThat(equipoService.findAllOrdenadoPorNombre()).hasSize(1);
+        assertThat(equipoService.findAllOrdenadoPorNombre().get(0).getNombre())
+                .isEqualTo("Proyecto AAA");
+    }
+
+    @Test
+    public void postNuevoEquipoConNombreVacioMuestraError() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Al enviar el formulario vacío se vuelve a mostrar con un error
+        this.mockMvc.perform(post("/equipos/nuevo")
+                        .param("nombre", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("El nombre del equipo no puede estar")));
+
+        // THEN
+        // No se ha creado ningún equipo
+        assertThat(equipoService.findAllOrdenadoPorNombre()).isEmpty();
     }
 
 
