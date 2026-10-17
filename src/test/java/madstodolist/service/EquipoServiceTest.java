@@ -163,6 +163,23 @@ public class EquipoServiceTest {
                 .isInstanceOf(EquipoServiceException.class);
     }
 
+    // test 4 jk
+    @Test
+    public void crearEquipoConNombreVacioLanzaExcepcion() {
+        // WHEN, THEN
+        // Crear un equipo sin nombre, con nombre vacío o solo con espacios
+        // lanza una excepción
+        assertThatThrownBy(() -> equipoService.crearEquipo(null))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.crearEquipo(""))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.crearEquipo("   "))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // THEN
+        // No se ha guardado ningún equipo en la base de datos
+        assertThat(equipoService.findAllOrdenadoPorNombre()).isEmpty();
+    }
 
 
 }
