@@ -8,6 +8,7 @@
 
     <div class="container-fluid mt-3">
         <h2>Equipos</h2>
+        <div class="alert alert-success" th:if="${mensaje != null}" th:text="${mensaje}"></div>
 
         <div class="row mt-3">
             <div class="col">
@@ -31,7 +32,9 @@
                 </table>
             </div>
         </div>
+
     </div>
+    <a class="btn btn-primary" th:href="@{/equipos/nuevo}">Nuevo equipo</a>
 
     <div th:replace="fragments::javascript"/>
 </body>

@@ -11,11 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import madstodolist.dto.EquipoData;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -100,5 +102,203 @@ public class EquipoWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("href=\"/equipos\"")));
     }
+    @Test
+    public void descripcionEquipoMuestraSusUsuarios() throws Exception {
+        // GIVEN
+        // Un usuario logeado que pertenece a un equipo
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN, THEN
+        // La página del equipo muestra su nombre y el email del miembro
+        this.mockMvc.perform(get("/equipos/" + equipo.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("Proyecto AAA"),
+                        containsString("ana@ua")
+                )));
+    }
+
+    @Test
+    public void descripcionEquipoNoExistenteDevuelve404() throws Exception {
+        // GIVEN
+        // Un usuario logeado y ningún equipo en la BD
+        logearUsuario();
+
+        // WHEN, THEN
+        // Pedir un equipo que no existe devuelve 404 Not Found
+        this.mockMvc.perform(get("/equipos/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void listadoEquiposContieneEnlaceADescripcion() throws Exception {
+        // GIVEN
+        // Un usuario logeado y un equipo
+        logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+
+        // WHEN, THEN
+        // El listado contiene el enlace a la página del equipo
+        this.mockMvc.perform(get("/equipos"))
+                .andExpect(content().string(
+                        containsString("href=\"/equipos/" + equipo.getId() + "\"")));
+    }
+        @Test
+    public void getNuevoEquipoDevuelveFormulario() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Se muestra el formulario para crear un equipo
+        this.mockMvc.perform(get("/equipos/nuevo"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("Nuevo equipo"),
+                        containsString("action=\"/equipos/nuevo\"")
+                )));
+    }
+
+    @Test
+    public void getNuevoEquipoSinLoginDevuelve401() throws Exception {
+        // GIVEN
+        // Ningún usuario logeado
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN, THEN
+        // No se puede acceder al formulario
+        this.mockMvc.perform(get("/equipos/nuevo"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void postNuevoEquipoCreaEquipoYRedirige() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Al enviar el formulario se redirige al listado con un mensaje
+        this.mockMvc.perform(post("/equipos/nuevo")
+                        .param("nombre", "Proyecto AAA"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attribute("mensaje", "Equipo creado correctamente"));
+
+        // THEN
+        // El equipo se ha guardado en la base de datos
+        assertThat(equipoService.findAllOrdenadoPorNombre()).hasSize(1);
+        assertThat(equipoService.findAllOrdenadoPorNombre().get(0).getNombre())
+                .isEqualTo("Proyecto AAA");
+    }
+
+    @Test
+    public void postNuevoEquipoConNombreVacioMuestraError() throws Exception {
+        // GIVEN
+        // Un usuario logeado
+        logearUsuario();
+
+        // WHEN, THEN
+        // Al enviar el formulario vacío se vuelve a mostrar con un error
+        this.mockMvc.perform(post("/equipos/nuevo")
+                        .param("nombre", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("El nombre del equipo no puede estar")));
+
+        // THEN
+        // No se ha creado ningún equipo
+        assertThat(equipoService.findAllOrdenadoPorNombre()).isEmpty();
+    }
+
+    @Test
+    public void descripcionEquipoNoMiembroMuestraBotonUnirme() throws Exception {
+        // GIVEN
+        // Un usuario logeado y un equipo al que no pertenece
+        logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+
+        // WHEN, THEN
+        // Se muestra el botón para unirse y no el de salir
+        this.mockMvc.perform(get("/equipos/" + equipo.getId()))
+                .andExpect(content().string(allOf(
+                        containsString("Unirme al equipo"),
+                        not(containsString("Salir del equipo"))
+                )));
+    }
+
+    @Test
+    public void descripcionEquipoMiembroMuestraBotonSalir() throws Exception {
+        // GIVEN
+        // Un usuario logeado que pertenece a un equipo
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN, THEN
+        // Se muestra el botón para salir y no el de unirse
+        this.mockMvc.perform(get("/equipos/" + equipo.getId()))
+                .andExpect(content().string(allOf(
+                        containsString("Salir del equipo"),
+                        not(containsString("Unirme al equipo"))
+                )));
+    }
+
+    @Test
+    public void postUnirseAñadeUsuarioAlEquipo() throws Exception {
+        // GIVEN
+        // Un usuario logeado y un equipo al que no pertenece
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+
+        // WHEN, THEN
+        // Al unirse se redirige a la página del equipo con un mensaje
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/unirse"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/equipos/" + equipo.getId()))
+                .andExpect(flash().attribute("mensaje", "Te has unido al equipo"));
+
+        // THEN
+        // El usuario pertenece ahora al equipo
+        assertThat(equipoService.usuarioPerteneceAEquipo(equipo.getId(), usuario.getId())).isTrue();
+    }
+
+    @Test
+    public void postSalirEliminaUsuarioDelEquipo() throws Exception {
+        // GIVEN
+        // Un usuario logeado que pertenece a un equipo
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN, THEN
+        // Al salir se redirige a la página del equipo con un mensaje
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/salir"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/equipos/" + equipo.getId()))
+                .andExpect(flash().attribute("mensaje", "Has salido del equipo"));
+
+        // THEN
+        // El usuario ya no pertenece al equipo
+        assertThat(equipoService.usuarioPerteneceAEquipo(equipo.getId(), usuario.getId())).isFalse();
+    }
+
+    @Test
+    public void postUnirseSiYaEsMiembroMuestraError() throws Exception {
+        // GIVEN
+        // Un usuario logeado que ya pertenece a un equipo
+        UsuarioData usuario = logearUsuario();
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN, THEN
+        // Volver a unirse redirige con un mensaje de error
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/unirse"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("error"));
+    }
+
+
 
 }
