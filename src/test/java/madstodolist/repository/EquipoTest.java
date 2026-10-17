@@ -119,7 +119,28 @@ public class EquipoTest {
         assertThat(equipos).hasSize(2);
     }
 
+    // primer test jk
+    //cuando se añade un usuario a un equipo hay que actualizar ambos lados de la relación, porque JPA/Hibernate no lo hace automáticamente. [...] Lo mismo habría que hacer cuando se elimina un usuario de un equipo.
+        @Test
+    @Transactional
+    public void eliminarUsuarioDeEquipo() {
+        // GIVEN
+        // Un equipo con un usuario en la BD
+        Equipo equipo = new Equipo("Proyecto 1");
+        equipoRepository.save(equipo);
+        Usuario usuario = new Usuario("user@ua");
+        usuarioRepository.save(usuario);
+        equipo.addUsuario(usuario);
 
+        // WHEN
+        // Eliminamos el usuario del equipo
+        equipo.removeUsuario(usuario);
+
+        // THEN
+        // Se han actualizado los dos lados de la relación
+        assertThat(equipo.getUsuarios()).isEmpty();
+        assertThat(usuario.getEquipos()).isEmpty();
+    }
 
 
 }
