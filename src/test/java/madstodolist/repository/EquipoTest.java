@@ -11,6 +11,8 @@ import madstodolist.model.Usuario;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+// test 5
+import java.util.List;
 
 
 
@@ -102,6 +104,21 @@ public class EquipoTest {
         assertThat(usuarioBD.getEquipos()).hasSize(1);
         assertThat(usuarioBD.getEquipos()).contains(equipo);
     }
+    @Test
+    @Transactional
+    public void comprobarFindAll() {
+        // GIVEN
+        // Dos equipos en la base de datos
+        equipoRepository.save(new Equipo("Proyecto 2"));
+        equipoRepository.save(new Equipo("Proyecto 3"));
+
+        // WHEN
+        List<Equipo> equipos = equipoRepository.findAll();
+
+        // THEN
+        assertThat(equipos).hasSize(2);
+    }
+
 
 
 
