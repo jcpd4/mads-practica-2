@@ -7,6 +7,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import madstodolist.model.Usuario;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EquipoTest {
     @Autowired
     private EquipoRepository equipoRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Test
     public void crearEquipo() {
@@ -74,6 +77,32 @@ public class EquipoTest {
         assertThat(equipo1).isEqualTo(equipo2);
         assertThat(equipo2).isNotEqualTo(equipo3);
     }
+        @Test
+    @Transactional
+    public void comprobarRelacionBaseDatos() {
+        // GIVEN
+        // Un equipo y un usuario en la BD
+        Equipo equipo = new Equipo("Proyecto 1");
+        equipoRepository.save(equipo);
+
+        Usuario usuario = new Usuario("user@ua");
+        usuarioRepository.save(usuario);
+
+        // WHEN
+        // Añadimos el usuario al equipo
+        equipo.addUsuario(usuario);
+
+        // THEN
+        // La relación entre usuario y equipo queda actualizada en BD
+        Equipo equipoBD = equipoRepository.findById(equipo.getId()).orElse(null);
+        Usuario usuarioBD = usuarioRepository.findById(usuario.getId()).orElse(null);
+
+        assertThat(equipoBD.getUsuarios()).hasSize(1);
+        assertThat(equipoBD.getUsuarios()).contains(usuario);
+        assertThat(usuarioBD.getEquipos()).hasSize(1);
+        assertThat(usuarioBD.getEquipos()).contains(equipo);
+    }
+
 
 
 }

@@ -3,6 +3,9 @@ package madstodolist.model;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
+// test 4
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -16,6 +19,14 @@ public class Equipo implements Serializable {
     private Long id;
 
     private String nombre;
+    // Relación LAZY: al recuperar un equipo NO se recuperan automáticamente
+    // sus usuarios. Solo se cargan cuando se accede a la colección.
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "equipo_usuario",
+            joinColumns = { @JoinColumn(name = "fk_equipo") },
+            inverseJoinColumns = { @JoinColumn(name = "fk_usuario") })
+    Set<Usuario> usuarios = new HashSet<>();
+
 
     // Constructor vacío necesario para JPA/Hibernate.
     // No debe usarse desde la aplicación.
@@ -36,7 +47,19 @@ public class Equipo implements Serializable {
     public String getNombre() {
         return nombre;
     }
-        @Override
+        public Set<Usuario> getUsuarios() {
+        return usuarios;
+    }
+
+    public void addUsuario(Usuario usuario) {
+        // Hay que actualizar ambas colecciones, porque
+        // JPA/Hibernate no lo hace automáticamente
+        this.getUsuarios().add(usuario);
+        usuario.getEquipos().add(this);
+    }
+
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
