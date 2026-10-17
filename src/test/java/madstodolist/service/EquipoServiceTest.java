@@ -203,4 +203,29 @@ public class EquipoServiceTest {
     }
 
 
+    // test 6 jk
+    @Test
+    public void comprobarSiUsuarioPerteneceAEquipo() {
+        // GIVEN
+        // Un usuario que pertenece a un equipo pero no a otro
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        UsuarioData usuarioBD = usuarioService.registrar(usuario);
+        EquipoData equipo1 = equipoService.crearEquipo("Proyecto 1");
+        EquipoData equipo2 = equipoService.crearEquipo("Proyecto 2");
+        equipoService.añadirUsuarioAEquipo(equipo1.getId(), usuarioBD.getId());
+
+        // WHEN, THEN
+        // Pertenece al primer equipo y no al segundo
+        assertThat(equipoService.usuarioPerteneceAEquipo(equipo1.getId(), usuarioBD.getId())).isTrue();
+        assertThat(equipoService.usuarioPerteneceAEquipo(equipo2.getId(), usuarioBD.getId())).isFalse();
+
+        // Si el equipo no existe se lanza una excepción
+        assertThatThrownBy(() -> equipoService.usuarioPerteneceAEquipo(equipo2.getId() + 1, usuarioBD.getId()))
+                .isInstanceOf(EquipoServiceException.class);
+    }
+
+
+
 }
