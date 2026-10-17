@@ -33,7 +33,7 @@ public class AcercaDeWebTest {
     @Test
     public void getAboutDevuelveNombreAplicacion() throws Exception {
         this.mockMvc.perform(get("/about"))
-                .andExpect(content().string(containsString("ToDoList")));
+                .andExpect(content().string(containsString("XXXX")));
     }
 
     @Test
